@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HAR to Pinterest Links</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/script.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1>𝙈𝘼𝙉𝙅𝙄 𝙎𝘼𝙈𝘼</h1>
+        <nav>
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Tools</a></li>
+                <li><a href="#">About</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="upload-box">
+            <h2>Upload HAR File</h2>
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <input type="file" name="harFile" accept=".json" required>
+                <button type="submit">Process</button>
+            </form>
+        </section>
+
+        <% if (links) { %>
+            <section class="result-box">
+                <h2>Extracted Links</h2>
+                <p><strong>Link Count:</strong> <%= linkCount %></p>
+                <textarea id="all-links" readonly><%= links.join('\n') %></textarea>
+                
+                <div class="button-container">
+                    <button class="copy-btn" onclick="copyAllLinks()">Copy All Links</button>
+                    <a href="<%= downloadLink %>" download>
+                        <button class="download-btn">Download Links</button>
+                    </a>
+                </div>
+            </section>
+        <% } %>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 HAR to Pinterest Links Tool by Manji Sama</p>
+    </footer>
+</body>
+</html>
