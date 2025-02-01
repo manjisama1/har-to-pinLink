@@ -1,15 +1,20 @@
+const path = require('path');
 const express = require('express');
 const multer = require('multer');
 const fs = require('fs');
-const path = require('path');
 
 const app = express();
 
-// Use Vercel's temp folder for uploads
+// Set the correct views directory
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+app.use(express.static(path.join(__dirname, 'public')));
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         const uploadPath = path.join(process.env.VERCEL_TEMP || __dirname, 'uploads');
-        fs.mkdirSync(uploadPath, { recursive: true }); // Ensure the folder exists
+        fs.mkdirSync(uploadPath, { recursive: true });
         cb(null, uploadPath);
     },
     filename: (req, file, cb) => {
@@ -19,12 +24,12 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-app.set('view engine', 'ejs');
-app.use(express.static(path.join(__dirname, 'public')));
-
 app.get('/', (req, res) => {
     res.render('index', { links: null, downloadLink: null, linkCount: 0 });
 });
+
+// Dummy route to prevent favicon errors
+app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 app.post('/upload', upload.single('harFile'), (req, res) => {
     const filePath = req.file.path;
@@ -66,7 +71,7 @@ app.get('/uploads/filtered_urls.txt', (req, res) => {
     });
 });
 
-// Use Vercel's dynamic port environment variable
+// Use Vercel's dynamic port
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
