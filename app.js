@@ -53,7 +53,8 @@ app.get('/uploads/filtered_urls.txt', (req, res) => {
     });
 });
 
-const PORT = 3000;
+// Use Vercel's dynamic port environment variable
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
