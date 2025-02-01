@@ -4,7 +4,20 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
-const upload = multer({ dest: 'uploads/' });
+
+// Use Vercel's temp folder for uploads
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const uploadPath = path.join(process.env.VERCEL_TEMP || __dirname, 'uploads');
+        fs.mkdirSync(uploadPath, { recursive: true }); // Ensure the folder exists
+        cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname);
+    },
+});
+
+const upload = multer({ storage });
 
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, 'public')));
@@ -27,14 +40,14 @@ app.post('/upload', upload.single('harFile'), (req, res) => {
         const uniqueUrls = Array.from(filteredUrls).filter(Boolean);
         const linkCount = uniqueUrls.length;
 
-        const outputPath = path.join(__dirname, 'uploads', 'filtered_urls.txt');
+        const outputPath = path.join(path.dirname(filePath), 'filtered_urls.txt');
         fs.writeFileSync(outputPath, uniqueUrls.join('\n'), 'utf-8');
 
         fs.unlinkSync(filePath);
 
         res.render('index', {
             links: uniqueUrls,
-            downloadLink: '/uploads/filtered_urls.txt',
+            downloadLink: `/uploads/filtered_urls.txt`,
             linkCount: linkCount,
         });
     } catch (error) {
@@ -45,7 +58,7 @@ app.post('/upload', upload.single('harFile'), (req, res) => {
 });
 
 app.get('/uploads/filtered_urls.txt', (req, res) => {
-    const file = path.join(__dirname, 'uploads', 'filtered_urls.txt');
+    const file = path.join(process.env.VERCEL_TEMP || __dirname, 'uploads', 'filtered_urls.txt');
     res.download(file, (err) => {
         if (!err) {
             fs.unlinkSync(file);
